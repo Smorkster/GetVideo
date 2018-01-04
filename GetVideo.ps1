@@ -2,6 +2,7 @@
 .SYNOPSIS
 	Reads a file of YouTube-links and downloads the videos
 .DESCRIPTION
+	Version 2
 	This script reads a file containing a list of addresses with videos that wants to be downloaded. It is mainly created for YouTube, but the application YouTube-dl can also handle other sites.
 	Before downloading, the script checks of there are (persumed) enough free space on the disc. It then continues with fetching information about the video then starts downloading.
 	If the video is located on YouTube the video will be marked as watched if the user have provided login credentials.
@@ -39,14 +40,18 @@ if($start -gt 0)
 	$start = $start -1
 }
 $Error[0] = $null
-$filename = "links.txt"
 $ErrorActionPreference = "SilentlyContinue"
 $youtubeCredentials = $null
 $youtubeCredentials = Get-Credentials
 $ErrorActionPreference = "Continue"
 $failedDownloads = New-Object System.Collections.Arraylist($null)
+$filename = "links.txt"
 $links = Get-Content $filename
-$ticker = 1
+if($links -eq $null)
+{
+	Write-Host "File empty. Quiting" -Foreground Cyan
+	return
+}$ticker = 1
 
 for(; $start -lt $links.Count; $start++)
 {

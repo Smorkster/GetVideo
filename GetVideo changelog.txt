@@ -1,0 +1,7 @@
+Version 2
+*********
+Now quits if file with links is empty
+
+Version 1
+*********
+Initial release
