@@ -1,3 +1,15 @@
+Version 4
+*********
+Rework of downloading. Now each download is done in a separate job, the script then waits for all jobs to finish
+This version is created in a new file
+Changed the way files are named
+
+Version 3
+*********
+Changed handling of user credentials
+Changed checking of error messages
+Added check if the user does not want to login to YouTube
+
 Version 2
 *********
 Now quits if file with links is empty
