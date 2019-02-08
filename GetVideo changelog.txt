@@ -1,3 +1,10 @@
+Version 5
+*********
+Corrected how title is renamed in videoinfo object
+Corrected fething of YouTube-uploader
+Changed color for the name when starting download
+Now rounds the freespace information to two decimals
+
 Version 4
 *********
 Rework of downloading. Now each download is done in a separate job, the script then waits for all jobs to finish
