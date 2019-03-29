@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-Reads a file of YouTube-links and downloads the videos
+    Reads a file of YouTube-links and downloads the videos
 .DESCRIPTION
-	Version 3
+	Version 6
 	This script reads a file containing a list of addresses with videos that wants to be downloaded. It is mainly created for YouTube, but the application YouTube-dl can also handle other sites.
 	Before downloading, the script checks of there are (persumed) enough free space on the disc. It then continues with fetching information about the video then starts downloading.
 	If the video is located on YouTube the video will be marked as watched if the user have provided login credentials.
@@ -104,7 +104,7 @@ for(; $start -lt $links.Count; $start++)
 			$videoname = "c:\users\6g1w\appdata\w\"+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
 			Start-Job -ScriptBlock {param($videolink,$videoname,$videoTitle) c:\users\6g1w\appdata\w\youtube-dl.exe $videolink -o $videoname -q;if((Get-ChildItem c:\users\6g1w\appdata\w -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
 		}
-		Write-Host "Downloading" $ticker "of" $links.Count -NoNewline
+		Write-Host "Downloading" $ticker "of" $links.Count " " -NoNewline
 		Write-Host $videoinfo.Title -ForegroundColor Cyan
 		$videoinfo = $null
 	} else {
@@ -125,13 +125,11 @@ $fails = Get-Job | ? {$_.State -eq 'Failed'}
 
 if($fails.Count -gt 0)
 {
-	$addresses = New-Object -ComObject System.Collections.ArrayList
 	Write-Host "These failed to download"
 	foreach($failed in $fails)
 	{
 		Write-Host $failed.ChildJobs[0].JobStateInfo.Reason.Message -ForegroundColor Red
-		$addresses.Add($failed.ChildJobs[0].JobStateInfo.Reason.Message.Split("`t")[1]) > $null
+        Add-Content $filename $failed.ChildJobs[0].JobStateInfo.Reason.Message.Split("`t")[1].Trim()
 	}
-	$addresses > $filename
 }
 Get-Job | Remove-Job
