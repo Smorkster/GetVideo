@@ -2,7 +2,7 @@
 .SYNOPSIS
     Reads a file of YouTube-links and downloads the videos
 .DESCRIPTION
-	Version 6
+	Version 7
 	This script reads a file containing a list of addresses with videos that wants to be downloaded. It is mainly created for YouTube, but the application YouTube-dl can also handle other sites.
 	Before downloading, the script checks of there are (persumed) enough free space on the disc. It then continues with fetching information about the video then starts downloading.
 	If the video is located on YouTube the video will be marked as watched if the user have provided login credentials.
@@ -23,6 +23,9 @@ function GetVideoInfo($url){
 		$user = (($request.Links | ? {$_.href -like "*/channel/*"} | ? {$_.innertext -eq $_.innerhtml})[0]).innerhtml
 		$title = ($request.ParsedHtml.title).TrimEnd(" - YouTube")
 		$published = (($request.ToString() -split '\n' | Select-String 'Published') -split "content=""")[1].Substring(0,10)
+	} elseif ($videolink -match "www.svtplay.se") {
+		$title = ($request.ParsedHtml.title -split '- ')[1].TrimEnd(" | SVT Play")
+		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].Substring(0,10)
 	} else {
 		$title = $request.ParsedHtml.title
 		$user = ([System.Uri] $url).Host -replace '^www\.'
@@ -44,20 +47,6 @@ function GetVideoInfo($url){
 	return $video
 }
 
-$errorHandling =# ($videoname, $videolink, $youtubeName, $youtubePassword)
-{
-# args[0] = videolink
-# args{1] = videoname
-	if(-not $?)
-	{
-		throw = $args[1] +"`n`t"+ $args[0]
-	} else {
-		if((Get-ChildItem c:\users\6g1w\w -filter $args[1]).count -eq 0)
-		{
-			throw = $args[1] +"`n`t"+ $args[0]
-		}
-	}
-}
 Add-Type -AssemblyName System.Web
 if($start -gt 0)
 {

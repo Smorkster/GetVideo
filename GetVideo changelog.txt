@@ -1,3 +1,12 @@
+Version 7
+*********
+Added support for handling SVT Play title and published
+Remove the 'errorhandling', since it wasn't used
+
+Version 6
+*********
+Changed the way failed addresses is written back to the file
+
 Version 5
 *********
 Corrected how title is renamed in videoinfo object
