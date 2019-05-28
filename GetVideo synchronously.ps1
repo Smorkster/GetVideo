@@ -15,6 +15,7 @@ param
 (
 	[int]$start = 0
 )
+
 function GetVideoInfo($url){
 	$video = New-Object -TypeName PSObject
 	$request = (Invoke-WebRequest -Uri $url)
@@ -24,8 +25,9 @@ function GetVideoInfo($url){
 		$title = ($request.ParsedHtml.title).TrimEnd(" - YouTube")
 		$published = (($request.ToString() -split '\n' | Select-String 'Published') -split "content=""")[1].Substring(0,10)
 	} elseif ($videolink -match "www.svtplay.se") {
+		$user = "SVT Play"
 		$title = ($request.ParsedHtml.title -split '- ')[1].TrimEnd(" | SVT Play")
-		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].Substring(0,10)
+		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].ToString().Substring(0,10)
 	} else {
 		$title = $request.ParsedHtml.title
 		$user = ([System.Uri] $url).Host -replace '^www\.'
@@ -81,17 +83,22 @@ for(; $start -lt $links.Count; $start++)
 
 		if($videolink -match "www.youtube.com")
 		{
-			$videoname = "c:\users\6g1w\appdata\w\"+$videoinfo.published+" " +$videoinfo.user+" %(title)s.%(ext)s"
+			$videoname = "C:\GetVideo\"+$videoinfo.published+" " +$videoinfo.user+" %(title)s.%(ext)s"
 		
 			if($youtubeUser -eq $null)
 			{
-				Start-Job -ScriptBlock {param($videolink,$videoname,$videotitle) c:\users\6g1w\appdata\w\youtube-dl.exe $videolink -o $videoname --no-playlist -q; if((Get-ChildItem c:\users\6g1w\appdata\w -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
+				Start-Job -ScriptBlock {param($videolink,$videoname,$videotitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname --no-playlist -q; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
 			} else {
-				Start-Job -ScriptBlock {param($videolink,$videoname,$youtubeUserName,$youtubeUserPassword,$videoTitle) c:\users\6g1w\appdata\w\youtube-dl.exe $videolink -o $videoname -u $youtubeUserName -p $youtubeUserPassword --mark-watched --no-playlist -q; if((Get-ChildItem c:\users\6g1w\appdata\w -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink, $videoname,$youtubeUser.UserName,$youtubeUser.GetNetworkCredential().Password,$videoinfo.Title > $null
+				Start-Job -ScriptBlock {param($videolink,$videoname,$youtubeUserName,$youtubeUserPassword,$videoTitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname -u $youtubeUserName -p $youtubeUserPassword --mark-watched --no-playlist -q; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink, $videoname,$youtubeUser.UserName,$youtubeUser.GetNetworkCredential().Password,$videoinfo.Title > $null
 			}
 		} else {
-			$videoname = "c:\users\6g1w\appdata\w\"+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
-			Start-Job -ScriptBlock {param($videolink,$videoname,$videoTitle) c:\users\6g1w\appdata\w\youtube-dl.exe $videolink -o $videoname -q;if((Get-ChildItem c:\users\6g1w\appdata\w -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
+			if($videoinfo.Published)
+			{
+				$videoname = "C:\GetVideo\"+$videoinfo.Published+" "+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
+			} else {
+				$videoname = "C:\GetVideo\"+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
+			}
+			Start-Job -ScriptBlock {param($videolink,$videoname,$videoTitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname -q --ffmpeg-location C:\GetVideo\ffmpeg\bin; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
 		}
 		Write-Host "Downloading" $ticker "of" $links.Count " " -NoNewline
 		Write-Host $videoinfo.Title -ForegroundColor Cyan
