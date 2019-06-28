@@ -1,3 +1,10 @@
+Version 8
+*********
+Moved inputs to parameters
+Implemented extraction of cookies from Firefox and Chrome
+Now uses cookies instead of logincredentials
+	See https://github.com/ytdl-org/youtube-dl/blob/master/README.md#how-do-i-pass-cookies-to-youtube-dl
+
 Version 7
 *********
 Added support for handling SVT Play title and published

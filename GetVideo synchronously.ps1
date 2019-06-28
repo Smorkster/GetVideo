@@ -1,33 +1,50 @@
 <#
-.SYNOPSIS
-    Reads a file of YouTube-links and downloads the videos
-.DESCRIPTION
-	Version 7
+.Synopsis
+    Reads a file of weblinks and downloads videos from the site
+.Description
+	Version 8
 	This script reads a file containing a list of addresses with videos that wants to be downloaded. It is mainly created for YouTube, but the application YouTube-dl can also handle other sites.
-	Before downloading, the script checks of there are (persumed) enough free space on the disc. It then continues with fetching information about the video then starts downloading.
-	If the video is located on YouTube the video will be marked as watched if the user have provided login credentials.
+	Before downloading, the script extracts YouTube- and Google-cookies checks of there are (persumed) enough free space on the disc, the lower limit is 2 GB of free space. It then continues with fetching information about the video and then starts downloading.
+	If the webaddress is located on YouTube, and there is a cookiefile, the video will be marked as watched credentials.
+	
+	The links.txt file must be located in the same folder as YouTube-dl and contain one webaddress per row
 	The videos will be named as such:
-		YouTube: <YouTube-username> <date of publication> <videoname>
+		YouTube: <date of publication> <YouTube-username> <videoname>
+		SVT Play: <date of publication> <Domain-name> <videoname>
 		Other sites: <Domain-name> <videoname>
+.Parameter workingDirectory
+	Directory where youtube-dl and links.txt is located. This is also where cookies.txt will be saved and where the videos will be downloaded.
+.Parameter extractCookiesFrom
+	Choase which webbrowser to extract the cookies from.
+.Parameter start
+	Chaose to start at position in the list of links other that at the first.
 #>
 
-param
-(
-	[int]$start = 0
+param(
+[Parameter(Mandatory=$true)]
+	[string] $workingDirectory,
+[ValidateSet("Firefox","Google Chrome")]
+	[string] $extractCookiesFrom,
+	[int] $start = 0
 )
 
-function GetVideoInfo($url){
+function GetVideoInfo
+{
+	param(
+		[string] $url
+	)
+
 	$video = New-Object -TypeName PSObject
 	$request = (Invoke-WebRequest -Uri $url)
 	if($videolink -match "www.youtube.com")
 	{
 		$user = (($request.Links | ? {$_.href -like "*/channel/*"} | ? {$_.innertext -eq $_.innerhtml})[0]).innerhtml
-		$title = ($request.ParsedHtml.title).TrimEnd(" - YouTube")
+		$title = ($request.ParsedHtml.title -split " - YouTube")[0]
 		$published = (($request.ToString() -split '\n' | Select-String 'Published') -split "content=""")[1].Substring(0,10)
 	} elseif ($videolink -match "www.svtplay.se") {
 		$user = "SVT Play"
-		$title = ($request.ParsedHtml.title -split '- ')[1].TrimEnd(" | SVT Play")
-		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].ToString().Substring(0,10)
+		$title = ($request.ParsedHtml.title -split " \| SVT Play")[0]
+		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].Substring(0,10)
 	} else {
 		$title = $request.ParsedHtml.title
 		$user = ([System.Uri] $url).Host -replace '^www\.'
@@ -49,24 +66,95 @@ function GetVideoInfo($url){
 	return $video
 }
 
+function ExtractCookies
+{
+	param(
+		[string] $browser,
+		[string] $workingDirectory
+	)
+
+	$user = $env:USERNAME
+	$queries = @()
+	$cookieData = @()
+	if ($browser -eq "Firefox")
+	{
+		$ffFolder = Get-ChildItem -Path "c:\users\$user\appdata\roaming\mozilla\firefox\profiles" -Name "*default*"
+		$cookiesSQLite = "C:\Users\$user\AppData\Roaming\Mozilla\Firefox\Profiles\$ffFolder\cookies.sqlite"
+		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM moz_cookies WHERE host LIKE "".youtube.com"""
+	} else {
+		$cookiesSQLite = Join-Path -Path $([System.Environment]::GetFolderPath("LocalApplicationData")) -ChildPath 'Google\Chrome\User Data\Default\Cookies'
+		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM cookies WHERE host_key='.youtube.com'"
+	}
+
+	$targetFileCookies = "$workingDirectory\cookies.txt"
+	$cookieString = ""
+
+	Remove-Item $targetFileCookies -ErrorAction SilentlyContinue
+	foreach ($cookie in $cookieData)
+	{
+		if ($browser -eq "Firefox")
+		{
+			$cookieHost = $cookie.host
+			if($cookie.sameSite) { $cookieSameSite = "TRUE" } else {$cookieSameSite = "FALSE"}
+			$cookiePath = $cookie.path
+			if($cookie.isSecure) { $cookieIsSecure = "TRUE" } else {$cookieIsSecure = "FALSE"}
+			$cookieExpiry = $cookie.expiry
+			$cookieName = $cookie.name
+			$cookieValue = $cookie.value
+		} elseif ($browser -eq "Google Chrome") {
+			$cookieHost = $cookie.host_key
+			if($cookie.firstpartyonly) { $cookieSameSite = "TRUE" } else {$cookieSameSite = "FALSE"}
+			$cookiePath = $cookie.path
+			if ($cookie.is_secure) { $cookieIsSecure = "TRUE" } else { $cookieIsSecure = "FALSE"}
+			$cookieExpiry = [math]::Floor(($cookie.expires_utc / 1000000) - 11644473600)
+			$cookieName = $cookie.name
+			$ByteArr = [System.Security.Cryptography.ProtectedData]::Unprotect(
+                $cookie.encrypted_value,
+                $null,
+                [System.Security.Cryptography.DataProtectionScope]::CurrentUser
+            )
+			$cookieValue = [System.Text.Encoding]::ASCII.GetString($ByteArr)
+		}
+
+		$cookieString += $cookieHost+"`t"+$cookieSameSite+"`t"+$cookiePath+"`t"+$cookieIsSecure+"`t"+$cookieExpiry+"`t"+$cookieName+"`t"+$cookieValue+"`r`n"
+	}
+
+	Add-Content -Value "# Netscape HTTP Cookie File`r`n" -Path $targetFileCookies
+	Add-Content -Value $cookieString -Path $targetFileCookies
+}
+
+Add-Type -AssemblyName System.Security
 Add-Type -AssemblyName System.Web
+if (Test-Path ($workingDirectory + "\links.txt"))
+{
+	$links = Get-Content ($workingDirectory + "\links.txt")
+	if($links -eq $null)
+	{
+		Write-Host "The links.txt file is empty. Exiting script." -ForegroundColor Red
+		return
+	}
+} else {
+	Write-Host "The links.txt file is not found. Exiting script." -ForegroundColor Red
+	return
+}
+
+$moduleLoaded = $false
+if ($extractCookiesFrom)
+{
+	try { Import-Module PSSQLite -ErrorAction Stop; $moduleLoaded = $true } catch { Write-Host "Can't import the module PSSQLite. Will not be able to extract cookies" }
+}
+
 if($start -gt 0)
 {
 	$start = $start -1
 }
-$ErrorActionPreference = "SilentlyContinue"
-$youtubeUser = Get-Credential
-$ErrorActionPreference = "Continue"
-$filename = Read-Host "Filename"
-$links = Get-Content $filename
+
+if ($moduleLoaded)
+{
+	ExtractCookies -browser $extractCookiesFrom -workingDirectory $workingDirectory
+}
 $lowerRemaindingDiscLimit = 2
 $ticker = 1
-
-if($links -eq $null)
-{
-	Write-Host "File with links is empty. Quiting" -ForegroundColor Cyan
-	return
-}
 
 for(; $start -lt $links.Count; $start++)
 {
@@ -79,26 +167,58 @@ for(; $start -lt $links.Count; $start++)
 		} else {
 			$videolink = $links[$start]
 		}
-		$videoinfo = GetVideoInfo($videolink)
+		$videoinfo = GetVideoInfo -url $videolink
 
 		if($videolink -match "www.youtube.com")
 		{
-			$videoname = "C:\GetVideo\"+$videoinfo.published+" " +$videoinfo.user+" %(title)s.%(ext)s"
+			$videoname = $videoinfo.published+" " +$videoinfo.user+" %(title)s.%(ext)s"
 		
-			if($youtubeUser -eq $null)
+			if(-not $moduleLoaded)
 			{
-				Start-Job -ScriptBlock {param($videolink,$videoname,$videotitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname --no-playlist -q; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
+				Start-Job -ScriptBlock {
+					param($videolink, $videoname, $videotitle, $dir)
+					cd $dir
+					.\youtube-dl.exe $videolink -o $videoname --no-playlist -q
+					if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
+					{
+						throw $videoTitle +"`n`t"+ $videolink
+					}
+				} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 			} else {
-				Start-Job -ScriptBlock {param($videolink,$videoname,$youtubeUserName,$youtubeUserPassword,$videoTitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname -u $youtubeUserName -p $youtubeUserPassword --mark-watched --no-playlist -q; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink } } -ArgumentList $videolink, $videoname,$youtubeUser.UserName,$youtubeUser.GetNetworkCredential().Password,$videoinfo.Title > $null
+				Start-Job -ScriptBlock {
+					param($videolink, $videoname, $videoTitle, $dir)
+					cd $dir
+					.\youtube-dl.exe $videolink -o $videoname --cookies "cookies.txt" --mark-watched --no-playlist -q
+					if((Get-ChildItem -filter *$videoTitle*).Count -eq 0)
+					{
+						throw $videoTitle +"`n`t"+ $videolink
+					}
+				} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 			}
+		} elseif ($videolink -match "www.svtplay.se") {
+			$videoname = $($videoinfo.user)+" "+ $($videoinfo.Title)+".%(ext)s"
+			$videoname
+			Start-Job -ScriptBlock {
+				param($videolink, $videoname, $videoTitle, $dir)
+				cd $dir
+				.\youtube-dl.exe $videolink -o $videoname -q --ffmpeg-location .\ffmpeg\bin
+				if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
+				{
+					throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle
+				}
+			} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 		} else {
-			if($videoinfo.Published)
-			{
-				$videoname = "C:\GetVideo\"+$videoinfo.Published+" "+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
-			} else {
-				$videoname = "C:\GetVideo\"+$videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
-			}
-			Start-Job -ScriptBlock {param($videolink,$videoname,$videoTitle) C:\GetVideo\youtube-dl.exe $videolink -o $videoname -q --ffmpeg-location C:\GetVideo\ffmpeg\bin; if((Get-ChildItem C:\GetVideo -filter *$videoTitle*).count -eq 0) { throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle } } -ArgumentList $videolink,$videoname,$videoinfo.Title > $null
+			$videoname = $($videoinfo.user)+" "+ $($videoinfo.Title)+".%(ext)s"
+			$videoname
+			Start-Job -ScriptBlock {
+				param($videolink, $videoname, $videoTitle, $dir)
+				cd $dir
+				.\youtube-dl.exe $videolink -o $videoname -q
+				if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
+				{
+					throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle
+				}
+			} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 		}
 		Write-Host "Downloading" $ticker "of" $links.Count " " -NoNewline
 		Write-Host $videoinfo.Title -ForegroundColor Cyan
@@ -116,8 +236,7 @@ Get-Job | Wait-Job > $null
 
 Write-Host "Done downloading" $links.Count "videos"
 Write-Host "Free space:" ([math]::Round($comp.FreeSpace / 1GB,2)) "GB"
-$null > $filename
-$fails = Get-Job | ? {$_.State -eq 'Failed'}
+$null > ($workingDirectory + "\links.txt")
 
 if($fails.Count -gt 0)
 {
