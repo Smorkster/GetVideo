@@ -2,7 +2,7 @@
 .Synopsis
     Reads a file of weblinks and downloads videos from the site
 .Description
-	Version 8
+	Version 9
 	This script reads a file containing a list of addresses with videos that wants to be downloaded. It is mainly created for YouTube, but the application YouTube-dl can also handle other sites.
 	Before downloading, the script extracts YouTube- and Google-cookies checks of there are (persumed) enough free space on the disc, the lower limit is 2 GB of free space. It then continues with fetching information about the video and then starts downloading.
 	If the webaddress is located on YouTube, and there is a cookiefile, the video will be marked as watched credentials.
@@ -22,10 +22,11 @@
 
 param(
 [Parameter(Mandatory=$true)]
-	[string] $workingDirectory,
+	[string] $WorkingDirectory,
 [ValidateSet("Firefox","Google Chrome")]
-	[string] $extractCookiesFrom,
-	[int] $start = 0
+	[string] $ExtractCookiesFrom,
+	[int] $Start = 0,
+	[switch] $ExitAfter
 )
 
 function GetVideoInfo
@@ -36,15 +37,23 @@ function GetVideoInfo
 
 	$video = New-Object -TypeName PSObject
 	$request = (Invoke-WebRequest -Uri $url)
-	if($videolink -match "www.youtube.com")
+	if($url -match "www.youtube.com")
 	{
 		$user = (($request.Links | ? {$_.href -like "*/channel/*"} | ? {$_.innertext -eq $_.innerhtml})[0]).innerhtml
 		$title = ($request.ParsedHtml.title -split " - YouTube")[0]
-		$published = (($request.ToString() -split '\n' | Select-String 'Published') -split "content=""")[1].Substring(0,10)
-	} elseif ($videolink -match "www.svtplay.se") {
+		$published = ($request.RawContent | Select-String -Pattern '(meta itemprop="datePublished".+")' -AllMatches | select -ExpandProperty matches | select -ExpandProperty value).SubString(39,10)
+	} elseif ($url -match "www.svtplay.se") {
 		$user = "SVT Play"
 		$title = ($request.ParsedHtml.title -split " \| SVT Play")[0]
-		$published = (($request.ToString() -split '\n' | Select-String 'Publicerades') -split "content=""")[4].Substring(0,10)
+		$date = (($request.ParsedHtml.all | ? {$_.className -like "*play_video-page__meta-data-item*"})[0]).textContent.Trim()
+        if ($date -like "*ig*r*") {
+            $published = ([datetime]::Today.AddDays(-1)).ToShortDateString()
+        } else {
+    		$y = [datetime]::Now.Year
+	    	$m = $date.Substring(7, 3) -replace "jan","01" -replace "feb","02" -replace "mar","03" -replace "apr","04" -replace "maj","05" -replace "jun","06" -replace "jul","07" -replace "aug","08" -replace "sep","09" -replace "okt","10" -replace "nov","11" -replace "dec","12"
+		    $d = $date.Substring(4, 2)
+    		$published = [string]$y + "-" + [string]$m +"-" + [string]$d
+        }
 	} else {
 		$title = $request.ParsedHtml.title
 		$user = ([System.Uri] $url).Host -replace '^www\.'
@@ -63,6 +72,7 @@ function GetVideoInfo
 	Add-Member -InputObject $video -MemberType NoteProperty -Name User -Value $user
 	Add-Member -InputObject $video -MemberType NoteProperty -Name Published -Value $published
 	Add-Member -InputObject $video -MemberType NoteProperty -Name Title -Value $title
+
 	return $video
 }
 
@@ -73,17 +83,17 @@ function ExtractCookies
 		[string] $workingDirectory
 	)
 
+	$where = "('.youtube.com','.svtplay.se')"
 	$user = $env:USERNAME
-	$queries = @()
 	$cookieData = @()
 	if ($browser -eq "Firefox")
 	{
 		$ffFolder = Get-ChildItem -Path "c:\users\$user\appdata\roaming\mozilla\firefox\profiles" -Name "*default*"
 		$cookiesSQLite = "C:\Users\$user\AppData\Roaming\Mozilla\Firefox\Profiles\$ffFolder\cookies.sqlite"
-		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM moz_cookies WHERE host LIKE "".youtube.com"""
+		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM moz_cookies WHERE host IN $where"
 	} else {
 		$cookiesSQLite = Join-Path -Path $([System.Environment]::GetFolderPath("LocalApplicationData")) -ChildPath 'Google\Chrome\User Data\Default\Cookies'
-		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM cookies WHERE host_key='.youtube.com'"
+		$cookieData += Invoke-SqliteQuery -DataSource $cookiesSQLite -Query "SELECT * FROM cookies WHERE host_key IN $where"
 	}
 
 	$targetFileCookies = "$workingDirectory\cookies.txt"
@@ -125,6 +135,11 @@ function ExtractCookies
 
 Add-Type -AssemblyName System.Security
 Add-Type -AssemblyName System.Web
+if ($workingDirectory -eq "h")
+{
+	$workingDirectory = $PSScriptRoot
+}
+	
 if (Test-Path ($workingDirectory + "\links.txt"))
 {
 	$links = Get-Content ($workingDirectory + "\links.txt")
@@ -171,7 +186,7 @@ for(; $start -lt $links.Count; $start++)
 
 		if($videolink -match "www.youtube.com")
 		{
-			$videoname = $videoinfo.published+" " +$videoinfo.user+" %(title)s.%(ext)s"
+			$videoname = $videoinfo.published+" " +$videoinfo.user+" "+$videoinfo.Title+".%(ext)s"
 		
 			if(-not $moduleLoaded)
 			{
@@ -179,6 +194,10 @@ for(; $start -lt $links.Count; $start++)
 					param($videolink, $videoname, $videotitle, $dir)
 					cd $dir
 					.\youtube-dl.exe $videolink -o $videoname --no-playlist -q
+					if ($Error[0] -ne $null)
+					{
+						throw $videoTitle +"`n`t"+ $videolink +"`n`t"+ $Error[0].CategoryInfo.TargetName
+					}
 					if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
 					{
 						throw $videoTitle +"`n`t"+ $videolink
@@ -189,6 +208,10 @@ for(; $start -lt $links.Count; $start++)
 					param($videolink, $videoname, $videoTitle, $dir)
 					cd $dir
 					.\youtube-dl.exe $videolink -o $videoname --cookies "cookies.txt" --mark-watched --no-playlist -q
+					if ($Error[0] -ne $null)
+					{
+						throw $videoTitle +"`n`t"+ $videolink +"`n`t"+ $Error[0].CategoryInfo.TargetName
+					}
 					if((Get-ChildItem -filter *$videoTitle*).Count -eq 0)
 					{
 						throw $videoTitle +"`n`t"+ $videolink
@@ -196,24 +219,30 @@ for(; $start -lt $links.Count; $start++)
 				} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 			}
 		} elseif ($videolink -match "www.svtplay.se") {
-			$videoname = $($videoinfo.user)+" "+ $($videoinfo.Title)+".%(ext)s"
-			$videoname
+			$videoname = $videoinfo.Published +" "+ $videoinfo.User+" "+ $videoinfo.Title+".%(ext)s"
 			Start-Job -ScriptBlock {
 				param($videolink, $videoname, $videoTitle, $dir)
 				cd $dir
 				.\youtube-dl.exe $videolink -o $videoname -q --ffmpeg-location .\ffmpeg\bin
+				if ($Error[0] -ne $null)
+				{
+					throw $videoTitle +"`n`t"+ $videolink +"`n`t"+ $Error[0].CategoryInfo.TargetName
+				}
 				if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
 				{
 					throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle
 				}
 			} -ArgumentList $videolink, $videoname, $videoinfo.Title, $workingDirectory > $null
 		} else {
-			$videoname = $($videoinfo.user)+" "+ $($videoinfo.Title)+".%(ext)s"
-			$videoname
+			$videoname = $videoinfo.user+" "+ $videoinfo.Title+".%(ext)s"
 			Start-Job -ScriptBlock {
 				param($videolink, $videoname, $videoTitle, $dir)
 				cd $dir
 				.\youtube-dl.exe $videolink -o $videoname -q
+				if ($Error[0] -ne $null)
+				{
+					throw $videoTitle +"`n`t"+ $videolink +"`n`t"+ $Error[0].CategoryInfo.TargetName
+				}
 				if ((Get-ChildItem -filter *$videoTitle*).count -eq 0)
 				{
 					throw $videoTitle +"`n`t"+ $videolink +"`n`t" + $videoTitle
@@ -238,13 +267,20 @@ Write-Host "Done downloading" $links.Count "videos"
 Write-Host "Free space:" ([math]::Round($comp.FreeSpace / 1GB,2)) "GB"
 $null > ($workingDirectory + "\links.txt")
 
+$fails = Get-Job | ? {$_.State -eq 'Failed'}
 if($fails.Count -gt 0)
 {
 	Write-Host "These failed to download"
 	foreach($failed in $fails)
 	{
 		Write-Host $failed.ChildJobs[0].JobStateInfo.Reason.Message -ForegroundColor Red
-        Add-Content $filename $failed.ChildJobs[0].JobStateInfo.Reason.Message.Split("`t")[1].Trim()
+        Add-Content ($workingDirectory + "\links.txt") $failed.ChildJobs[0].JobStateInfo.Reason.Message.Split("`t")[1].Trim()
 	}
+	Write-Host "Visit https://ytmp3.cc/"
 }
 Get-Job | Remove-Job
+
+if ($ExitAfter -and ($fails.Count -eq 0))
+{
+	Stop-Process -Id $PID
+}

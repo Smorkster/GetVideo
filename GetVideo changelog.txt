@@ -1,3 +1,11 @@
+Version 9
+*********
+Reinstated message for failed downloads, after mistakenly being removed
+Added errormessage from YouTube-dl to the message
+Corrected handling of date for SVT Play
+Changed how to get date of upload for YouTube
+Now correctly handles publishingdate for SVT Play, if posted 'yesterday' ("igår")
+
 Version 8
 *********
 Moved inputs to parameters
