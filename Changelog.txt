@@ -1,0 +1,177 @@
+2019-11-01
+**********
+Add-SD_AnvändareTillO365MigPilot - Rättat utskrift när skriptet är klart
+Add-SD_RumBokaEnAnvändare - Testar nu om behörighet redan finns
+Confirm-SD_AnvändareKontoStatus - Listar nu registrerade enheter / Kontrollerar ifall anställning finns på rätt organisation
+Get-SD_AnvändareEnheter - Ny. Hämta registrerade enheter i Azure
+Get-SD_DistExporteraFrånFleraTillExcel - Kontrollerar nu format på InputFile
+Update-SD_DistErsättAllaMedlemmar - Informerar nu bättre hur mycket som gjorts
+Update-SD_Distributionslista - Korrigerade hantering av interna mailadresser
+
+2019-06-28
+**********
+Get-SD_DatorerGAIAKontoLåstsVid - Resultat sorteras nu
+Get-SD_DistExporteraFrånFleraTillExcel - Testar nu om grupp finns, innan skriptet fortsätter
+Get-SD_FunkBehörigheter - Skriver nu även ut GrantSendOnBehalfTo
+Search-SD_GemObjektMedOrdINamnet - Rättade sökvilkoren för Exchange-kontaktobjekt / Sorterar nu resultatet
+Set-SD_DistÖppnaFörExterna - Ny. Öppna distributionslista för extern kontakt
+Sync-SD_FunkAzureTillExchange - Ändrat hur GrantSendOnBehalfTo tilldelas / Skriver nu ut lista över vilka som synkroniserats
+
+2019-06-20
+**********
+Add-SD_AnvändareAutosvar - Rättat dokumentationen
+Add-SD_AnvändareTillO365MigPilot - Rättat dokumentationen
+Add-SD_ResursTillGrupp - Rättat och utökat dokumentationen
+Add-SD_RumBokaEnAnvändare - Rättat och utökat dokumentationen
+Add-SD_RumBokaFleraAnvändare - Rättat och utökat dokumentationen
+Compare-SD_ObjektProperties - Rättat och utökat dokumentationen
+Confirm-SD_AnvändareEMSLicenserFrånExcelLista - Rättat och utökat dokumentationen
+Confirm-SD_AnvändareKontoStatus - Rättat och utökat dokumentationen
+Confirm-SD_AnvändareMedlemIAzureGrupp - Rättat och utökat dokumentationen
+Confirm-SD_AnvändareMedlemIFunktionsbrevlåda - Rättat och utökat dokumentationen
+Confirm-SD_AnvändaremsExchMailboxGuid - Rättat och utökat dokumentationen
+Confirm-SD_GemAzureSynkatTillExchange - Rättat och utökat dokumentationen
+Connect-SD_ToServices - Rättat och utökat dokumentationen
+Copy-SD_KopieraSkriptTillG - Stänger nu progressbar korrekt / Rättat och utökat dokumentationen
+Copy-SD_RumBehörighetFrånAnnatRum - Rättat och utökat dokumentationen
+Edit-SD_AdminBehörigheter - Rättat och utökat dokumentationen
+Get-SD_AnvändareGruppmedlemskap - Rättat och utökat dokumentationen / Rättat hämtningen av gruppmedlemskap
+Get-SD_AnvändareOmbud - Rättat och utökat dokumentationen
+Get-SD_AnvändareÄgareDistributionslistor - Rättat och utökat dokumentationen
+Get-SD_AnvändareÄgareFunktionsbrevlådor - Rättat och utökat dokumentationen
+Get-SD_DatorsGruppmedlemskap - Rättat och utökat dokumentationen / Ändrat utskrift för förtydligande
+Get-SD_DistAdresserIListan - Rättat och utökat dokumentationen / Skrivit om exporten till Excel
+Get-SD_DistExporteraFrånFleraTillExcel - Rättat och utökat dokumentationen / Skrivit om exporten till Excel
+Get-SD_DistMedlemmar - Rättat och utökat dokumentationen
+Get-SD_DistÄgare - Rättat och utökat dokumentationen
+Get-SD_ExporteraADAnvändare - Rättat dokumentationen / Exporterar nu till Excel
+Get-SD_FunkAdmins - Rättat och utökat dokumentationen
+Get-SD_FunkÄgare - Rättat och utökat dokumentationen
+Get-SD_GrupperEjBundnaTillSupportpanelen - Rättat och utökat dokumentationen
+Get-SD_RumBokningsbehörighet - Rättat och utökat dokumentationen / Skrivit om exporten till Excel
+Get-SD_RumExporteraFrånFleraTillExcel - Rättat och utökat dokumentationen / Skrivit om exporten till Excel
+Get-SD_RumIRumslista - Rättat och utökat dokumentationen
+Get-SD_RumPlats - Rättat och utökat dokumentationen
+Get-SD_Rumslistor - Rättat och utökat dokumentationen
+New-SD_Rumslista - Rättat och utökat dokumentationen
+Get-SD_ÄgareGaiaGrupp - Rättat och utökat dokumentationen
+Remove-SD_AnvändareIkonfoto - Rättat och utökat dokumentationen
+Rename-SD_Dist - Rättat och utökat dokumentationen
+Rename-SD_Funk - Rättat och utökat dokumentationen
+Rename-SD_Rum - Rättat och utökat dokumentationen
+Search-SD_AnvändareMessageTrace - Skrivit om exporten till Excel
+Search-SD_GemObjektMedOrdINamnet - Lagt till möjlighet att söka på kontaktobjekt i Exchange
+Set-SD_AnvändareAktiveraAzureInloggning - Rättat och utökat dokumentationen
+Set-SD_AnvändarePasswordNeverExpires - Rättat och utökat dokumentationen
+Sync-SD_RumAzureTillExchange - Rättat och utökat dokumentationen
+Update-SD_AnvändareBehörighetTillRum - Rättat och utökat dokumentationen
+Update-SD_DistErsättAllaMedlemmar - Stänger nu progressbar för borttag korrekt / Tog bort onödiga kontroller / Ändrat utskrift för tydligare läsning
+Update-SD_Distributionslista - Tog bort onödiga kontroller / Rättat dokumentationen
+
+2019-06-17
+**********
+ServicedeskPowerShell-Modul - Skapar nu lista över kommandotyper / Bröt ut Show-SD_Meny till eget skript
+Add-SD_AnvändareAutosvar - Korrigerade progressbar
+Add-SD_AnvändareTillO365MigPilot - La till meddelande när det är klart / La till exception-kontroll om medlemskap finns
+Add-SD_RumBokaEnAnvändare - La till meddelande när det är klart
+Confirm-SD_AnvändareKontoStatus - Tidigarelade kontroll ifall konto i Azure har blockerad inloggning
+New-SD_Rumslista - La till meddelande när det är klart
+Remove-SD_AnvändareIkonfoto - La till meddelande när det är klart
+Set-SD_AnvändareAktiveraAzureInloggning - Bytt namn från Set-SD_AnvändareAktiveraInloggning / La till meddelande när det är klart / Ändrade hur namn skrivs ut
+Set-SD_AnvändarePasswordNeverExpires - La till meddelande när det är klart
+Set-SD_RumBekräftelseMeddelande - La till meddelande när det är klart
+Set-SD_RumBokningsDetaljerSynliga - La till meddelande när det är klart
+Show-SD_Changelog - Ändrade layout för hur changetext visas
+Show-SD_Meny - Ny. Bröt ut från funktion till eget skript / Utökade funktionaliteten för att filtrera på typ och mål / Vid filtrering visas synopsis för skriptet
+Update-SD_AnvändareBehörighetTillRum - La till meddelande när det är klart
+Update-SD_Distributionslista - Kontrollerar nu även mailadress mot kontakter / Ändrade texterna för att göra det tydligare att läsa
+
+2019-06-03
+**********
+ServicedeskPowerShell-Modul - Fyller nu upp nya changelog variabeln / Skriver nu ut version vid import
+Starta Servicedesk PowerShell-Modul - Uppdaterat text vid start / Lagt till dokumentation
+Add-SD_RumBokaEnAnvändare - Korrigerat hantering av parametrar
+Confirm-SD_AnvändareKontoStatus - Hanterar nu problem att nå AD-server
+Edit-SD_AdminBehörigheter - Ignorerar tomma rader i filen
+Get-SD_AnvändareOmbud - Korrigerade hämtningen av behörigheter för kalender / Hämtar nu även de som får skicka mail som ombud
+Get-SD_DistExporteraFrånFleraTillExcel - Om namn på blad redan finns, använd mailadress / Skriver endast ut ägare som är person / Garanterar nu hämtning av alla medlemmar
+Get-SD_RumBokningsbehörighet - Förtydligade utskrifterna
+Show-SD_Changelog - Ny, visar changes från changelog
+Sync-SD_FunkAzureTillExchange - La till att lägga användarna i GrantSendOnBehalfTo
+
+2019-05-06
+**********
+Uppdaterat och utökad dokumentationen för de flesta skripten
+Get-SD_RumBokningsbehörighet - Tagit bort hela synkroniseringsfunktionaliteten, ska nu enbart lista synkade/osynkade / La till parameter för att skriva ut vilka som inte är synkroniserade
+Search-SD_AnvändareMessageTrace - La till hantering om ingen adress angavs
+Search-SD_GemObjektMedOrdINamnet - La till beskrivningar för parametrar / La till felmeddelanden / Ändrade sökningsparametrar för eftektivitet och tydlighet
+Sync-SD_FunkAzureTillExchange - Kan nu ta emot både namn och mailadress för funktionsbrevlådan
+Sync-SD_RumAzureTillExchange - Uppdaterat till att nu primärt lägga in användarna i BookInPolicy, som styr bokningsbehörigheter / Synkroniserar nu hela Azure-gruppen
+Update-SD_AnvändareBehörighetTillRum - Lägger nu även på behörigheten i BookInPolicy
+
+2019-04-23
+**********
+Add-SD_RumBokaEnAnvändare - Sätter nu attribut att enbart behöriga kan boka rummet
+Confirm-SD_AnvändareKontoStatus - Lagt till kontroll av aktiv inloggning med O365-konto
+Get-SD_DistÄgare - Skriver nu även ut administratörer
+Get-SD_RumBokningsbehörighet - Flyttat exporten innanför if-sats för kontroll att Azure-gruppen inte är tom / La till Verbose-text för förtydligande för användaren
+Search-SD_AnvändareMessageTrace - Ny. Gör MessageTrace för angiven mottagare och/eller avsändare. Finns möjlighet att exportera resultatet till Excel
+Search-SD_AzureGruppMedOrdINamnet - Ändrat utskrift för enklare visualisering
+Sync-SD_RumAzureTillExchange - La till hantering av maxgräns i Exchange behörigheter
+Update-SD_Distributionslista - Korrigerade beräkningen av antal uppdateringar
+
+2019-03-29
+**********
+Confirm-SD_AnvändareMedlemIAzureGrupp - Hämtar nu alla medlemmar i Azure-grupp
+Confirm-SD_GemAzureSynkatTillExchange - Hämtar nu alla medlemmar i Azure-grupp
+Edit-SD_AdminBehörigheter - Hanterar nu varningar vid borttag av behörighet
+Get-SD_FunkBehörigheter - Hämtar nu alla medlemmar i Azure-grupp
+Get-SD_RumBokningsbehörighet - Ändrad parameter att nu ange att synkronisering ska utföras / La till progressbar / La till hantering av borttagen adress / Tar nu fram samtliga medlemmar i Azure-grupp / Skriver nu ut antal som inte har blivit synkroniserade / Listning av icke synkade sker nu enbart om synkning inte ska utföras
+Get-SD_RumExporteraFrånFleraTillExcel - Hämtar nu alla medlemmar i Azure-grupp
+Sync-SD_RumAzureTillExchange - Ändrade vilka exceptions som ska hanteras / Hämtar nu alla medlemmar i Azure-grupp
+
+2019-03-14
+**********
+Gått igenom de flesta skript för omdefiniering av handeringen av exceptions, för enklare kodstruktur
+Add-SD_AnvändareAutosvar - Rättat text i Write-Progress
+Get-SD_AnvändareOmbud - La till att kontrollera efter engelsk kalender om svensk inte fanns på kontot
+Add-SD_RumBokaFleraAnvändare - Lägger nu på behörighet av de konton som inte har synkats från Azure
+Confirm-SD_AnvändareKontoStatus - Korrigerat hur rapport för minuter skapas för nuvarande datum
+Connect-SD_ToServices - Tar nu bort gamla, inlästa, temporära, Exchange-moduler
+Get-SD_DistÄgare - La till filtrering för att enbart visa användare
+Get-SD_FunkAdmins - Ändrat till att hämtning av behörigheter görs på den hittade maillådan, istället för namn angivet av användaren
+Get-SD_FunkBehörigheter - Strukturerade om hämtningen av behörigheter / Kan nu ta mailadress till funktionsbrevlåda som parameter
+Get-SD_RumBokningsbehörighet - Lägger nu på behörighet av de konton som inte har synkats från Azure / Inte längre output när behörighet på rums maillåda skapas
+Starta Servicedesk PowerShell-Modul - Tar nu bort gamla, inlästa, temporära, Exchange-moduler
+Sync-SD_FunkAzureTillExchange - Ny. Skapa Exchange-behörigheter till funktionsbrevlåda för alla medlemmar i respektive Azure-grupp
+Sync-SD_RumAzureTillExchange - Uppdaterad help / Rätta variabelnamn / Lagt till Exception-hantering
+Update-SD_DistErsättAllaMedlemmar - Ny. Ta bort alla medlemmar i distributionslistan och lägg till de som ska ersätta
+Update-SD_DistExterna - La till hantering av interna mailadresser / Bytt namn till Update-SD_Distributionslista / La till hantering av okänd action
+
+2019-02-28
+**********
+Rename-SD_Funk - Avslutar om inga funktionsbrevlådor hittades
+Get-SD_RumExporteraFrånFleraTillExcel - Ny, exportera diverse olika roller för Azure-grupper relaterade till rum
+Confirm-SD_AnvändareKontoStatus - Listar nu senast lyckade inloggning
+Set-SD_AnvändarePasswordNeverExpires - Tar nu även emot UserPrincipalName som parameter
+Starta Servicedesk PowerShell-Modul - Korrigerad att nu kunna starta AHK-skript oavsett användares currentfolder Hanterar nu återanslutning till Exchange, t.ex. om anslutningen brutits p.g.a. timeout
+Copy-SD_RumBehörighetFrånAnnatRum - Ny, kopiera rums behörigheter för bokning, från ett rum till ett annat
+Copy-SD_KopieraSkriptTillG - La till progressbar
+Get-SD_RumBokningsbehörighet - Ändrade hanteringen av användare för att öka träffsäkerheten / Export exkluderar nu behörighet kopplad till konto som tagits bort
+Update-SD_DistExterna - Kontrollerar nu om distributionslistan finns i Exchange, finns den inte, gå vidare med nästa item i foreach
+Connect-SD_ToServices - Hanterar nu återanslutning till Exchange, t.ex. om anslutningen brutits p.g.a. timeout
+AutoLösenord.ahk - Ändrat identifieringen av inloggningsfönstret för att slippa uppdatering av skript efter varje uppdatering
+
+2019-02-15
+**********
+Get-SD_FunkBehörigheter - Skriver nu ut medlemmar för alla grupper / La till färg för tydlighet i utskriften
+Get-SD_RumBokningsbehörighet - Export sker nu till Excel istället för CSV
+Get-SD_FunkÄgare - La till felhantering ifall maillåda inte finns
+Get-SD_AnvändareÄgareFunktionsbrevlådor - Korrigerar flödet
+Get-SD_AnvändareÄgareDistributionslistor - Ny
+
+2019-02-12
+**********
+Get-SD_DistAdresserIListan - Användarna läggs nu in i en tabell, rättade till rensning av Excel-comobject
+Get-SD_DistExporteraFrånFleraTillExcel - Användarna läggs nu in i en tabell, rättade till rensning av Excel-comobject
+Get-SD_RumBokningsbehörighet - Användarna läggs nu in i en tabell, rättade till rensning av Excel-comobject
