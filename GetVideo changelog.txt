@@ -1,113 +1,67 @@
-﻿Version 10
-
+﻿Version 11
 **********
+Added color for videoname in progressoutput
+No longer shows warnings when downloading WatchLater-list
+Added text for verbosity
+Now correctly fetches date of publication from SVT Play
+Modified how date of publication is created for SVT Play
+Now informs if WatchLater-list is empty
+Will now clear WatchLater-list of watched videos
 
+Version 10
+**********
 Added support for YouTube's WatchLater-list. If used, only those YouTube-videos will be downloaded
-
 New parameter ExitAfter tells script to close PowerShell-window to close when download is finished
-
 Added parameter to set number of videos to download. Only used for YouTubes WatchLater-list
 
-
-
 Version 9
-
 *********
-
 Reinstated message for failed downloads, after mistakenly being removed
-
 Added errormessage from YouTube-dl to the message
-
 Corrected handling of date for SVT Play
-
 Changed how to get date of upload for YouTube
-
-Now correctly handles publishingdate for SVT Play, if posted 'yesterday' ("igÃ¥r")
-
-
+Now correctly handles publishingdate for SVT Play, if posted 'yesterday' ("igår")
 
 Version 8
-
 *********
-
 Moved inputs to parameters
-
 Implemented extraction of cookies from Firefox and Chrome
-
 Now uses cookies instead of logincredentials
-
 	See https://github.com/ytdl-org/youtube-dl/blob/master/README.md#how-do-i-pass-cookies-to-youtube-dl
 
-
-
 Version 7
-
 *********
-
 Added support for handling SVT Play title and published
-
 Remove the 'errorhandling', since it wasn't used
 
-
-
 Version 6
-
 *********
-
 Changed the way failed addresses is written back to the file
 
-
-
 Version 5
-
 *********
-
 Corrected how title is renamed in videoinfo object
-
 Corrected fething of YouTube-uploader
-
 Changed color for the name when starting download
-
 Now rounds the freespace information to two decimals
 
-
-
 Version 4
-
 *********
-
 Rework of downloading. Now each download is done in a separate job, the script then waits for all jobs to finish
-
 This version is created in a new file
-
 Changed the way files are named
 
-
-
 Version 3
-
 *********
-
 Changed handling of user credentials
-
 Changed checking of error messages
-
 Added check if the user does not want to login to YouTube
 
-
-
 Version 2
-
 *********
-
 Now quits if file with links is empty
 
-
-
 Version 1
-
 *********
-
 Initial release
-
 
