@@ -6,6 +6,6 @@ If the video is located on YouTube, the video will be marked as watched if scrip
 
 The videos will be named as such:
 
-  YouTube: <Date of publication> <YouTube-username> <Videoname>
-  SVT Play: <Date of publication> SVT Play <Videoname>
-  Other sites: <Domain-name> <Videoname>
+  * YouTube: `<Date of publication> <YouTube-username> <Videoname>`
+  * SVT Play: `<Date of publication> SVT Play <Videoname>`
+  * Other sites: `<Domain-name> <Videoname>`
