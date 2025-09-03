@@ -1,2 +1,5 @@
 youtube-dl.exe
 cookies.txt
+.coverage
+__pycache__/
+.pytest_cache/
